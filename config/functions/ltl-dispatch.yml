@@ -21,8 +21,8 @@ function:
     db_host: ${ssm:/omni-dw/${self:provider.stage}/db/host~true}
     db_port: ${ssm:/omni-dw/${self:provider.stage}/db/port} 
     REGION: ${self:provider.region}
-    fourkites_url: ${ssm:/omni-dw/${self:provider.stage}/fourkites/url}    
-    fourkites_username: ${ssm:/omni-dw/${self:provider.stage}/fourkites/auth/username}
-    fourkites_password: ${ssm:/omni-dw/${self:provider.stage}/fourkites/auth/password}
-    fourkites_tablename: ${ssm:/omni-dw/${self:provider.stage}/fourkites/tableName}
-    fourkites_tableindex: ${ssm:/omni-dw/${self:provider.stage}/fourkites/tableIndex}
+    fourkites_url: ${ssm:/${self:service}/${self:provider.stage}/url}    
+    fourkites_username: ${ssm:/${self:service}/${self:provider.stage}/auth/username}
+    fourkites_password: ${ssm:/${self:service}/${self:provider.stage}/auth/password}
+    fourkites_tablename: ${ssm:/${self:service}/${self:provider.stage}/ltlDispatch/table}
+    fourkites_tableindex: ${ssm:/${self:service}/${self:provider.stage}/ltl-dispatch/fileNumber/index}
