@@ -11,27 +11,17 @@ logger.setLevel(logging.INFO)
 client = boto3.client('dynamodb')
 from boto3.dynamodb.conditions import Key, Attr
 
+from src.common import modify_date
+from src.common import execute_db_query
+
 def handler(event, context):
     try :
-        con=psycopg2.connect(dbname = os.environ['db_name'], host=os.environ['db_host'],
-                            port= os.environ['db_port'], user = os.environ['db_username'], password = os.environ['db_password'])
-        con.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        cur = con.cursor()
-        
-        records_list = []
-        shipment_records = {'updates':''}
-        url = os.environ['fourkites_url']        
-        #sql file which contains all the main tables create query
-        sql_file = open('tl-dispatch.sql','r')
-        
-        result = cur.execute(sql_file.read())
-        con.commit()
-        for results in cur.fetchall():
+        query = 'Select shipper_name,reference_nbr,op_carrier_scac,truck_trailer_nbr,truck_trailer_nbr,latitude,longitude,city,state,event_date,pod_date,file_nbr from fourkites_tl where message_sent = '''
+        queryData = execute_db_query(query)
+        for results in queryData:
             temp = recordsConv(results,con)
             records_list.append(temp)
-            
-        cur.close()
-        con.close()
+        
         shipment_records = {'updates':records_list}
         payload = json.dumps(shipment_records)
         logger.info("Payload loaded into Fourkites API  :{}".format(payload))
@@ -54,8 +44,8 @@ def recordsConv(y,con):
         record["longitude"] = y[6]
         record["city"] = y[7]
         record["state"] = y[8]
-        record["locatedAt"] = dateconv(y[9])
-        record["deliveredAt"] = dateconv(y[10])
+        record["locatedAt"] = modify_date(y[9])
+        record["deliveredAt"] = modify_date(y[10])
         shipper = y[0]
         billoflading = y[1]
         operatingCarrierScac = y[2]
@@ -74,19 +64,12 @@ def recordsConv(y,con):
         cur.execute(f"UPDATE public.fourkites_tl SET message_sent = 'Y' where file_nbr = '{file_nbr}' and reference_nbr = '{billoflading}'")
         con.commit()
         return record
+        cur.close()
+        con.close()
     except Exception as e:
         logging.exception("RecordConversionError: {}".format(e))
         raise RecordConversionError(json.dumps({"httpStatus": 400, "message": "Record conversion error."}))
 
-def dateconv(x):
-    try:
-        if x == None:
-            x = 'null'
-            return x
-        else:
-            return x.isoformat()
-    except Exception as e:
-            logging.exception("DateConversionError: {}".format(e))
 
 def updateDynamoDB(shipper,billoflading,operatingCarrierScac,truckNumber,trailerNumber,latitude,longitude,city,state,locatedAt,deliveredAt,file_nbr):
     try:

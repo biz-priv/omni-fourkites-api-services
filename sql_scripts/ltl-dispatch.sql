@@ -1,1 +1,0 @@
-Select shipper_name,reference_nbr,trim(x12_status),x12_status_desc,event_date,pod,pod_date,status,file_nbr from fourkites_ltl WHERE message_sent = '' ;
