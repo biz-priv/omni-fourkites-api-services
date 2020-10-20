@@ -1,0 +1,28 @@
+
+function:
+  handler: src/tl-dispatch.handler
+  name: ${self:service}-tl-dispatch-${self:provider.stage}
+  description: omni fourkites tl dispatch - ${self:provider.stage}
+  memorySize: 256
+  timeout: 60
+  package:
+    include:
+    - src/tl-dispatch.py
+    - psycopg2/*
+  events:  
+    - schedule:
+        name: omni-dw-fourkites-tl-dispatch-${self:provider.stage}
+        description: 'schedule cloud watch event on fourkites tl dispatch lambda for every 30 minutes'
+        rate: rate(30 minutes)
+  environment:
+    db_username: ${ssm:/omni-dw/${self:provider.stage}/db/user~true}
+    db_password: ${ssm:/omni-dw/${self:provider.stage}/db/password~true}
+    db_name: ${ssm:/omni-dw/${self:provider.stage}/db/name}
+    db_host: ${ssm:/omni-dw/${self:provider.stage}/db/host~true}
+    db_port: ${ssm:/omni-dw/${self:provider.stage}/db/port} 
+    REGION: ${self:provider.region}
+    fourkites_url: ${ssm:/omni-dw/${self:provider.stage}/fourkites/url}    
+    fourkites_username: ${ssm:/omni-dw/${self:provider.stage}/fourkites/auth/username}
+    fourkites_password: ${ssm:/omni-dw/${self:provider.stage}/fourkites/auth/password}
+    fourkites_tablename: ${ssm:/omni-dw/${self:provider.stage}/fourkites/tableName}
+    fourkites_tableindex: ${ssm:/omni-dw/${self:provider.stage}/fourkites/tableIndex}

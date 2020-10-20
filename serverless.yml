@@ -1,0 +1,41 @@
+service: omni-dw-fourkites
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  deploymentBucket: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
+  role: ${ssm:/omni-dw/${self:provider.stage}/lambda/role}  
+  vpc:
+    securityGroupIds:
+      - ${ssm:/omni-dw/${self:provider.stage}/lambda/sgId}
+    subnetIds:
+      - ${ssm:/omni-dw/${self:provider.stage}/lambda/subnetA}
+  stackTags: 
+    Application: Fourkites
+    CreateBy: BizCloudExperts
+    Environment: ${self:provider.stage} 
+
+custom: 
+  serverless-layers:
+    functions:
+      - ltl-dispatch
+      - tl-dispatch   
+    dependenciesPath: ./requirements.txt
+    
+plugins:
+  - serverless-layers
+  
+package:
+  individually: true
+  exclude:
+  - '**/*'
+  - serverless.yml
+
+functions:
+  ltl-dispatch: ${file(config/functions/ltl-dispatch.yml):function}
+  tl-dispatch: ${file(config/functions/tl-dispatch.yml):function}
+  
+
+    
