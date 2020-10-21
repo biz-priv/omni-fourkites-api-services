@@ -110,7 +110,8 @@ def updateDynamoDB(shipper,billoflading,statuscode,status,eventTimestamp,deliver
         return response
     except Exception as e:
         logging.exception("UpdateDynamodbError: {}".format(e))
-
+        raise UpdateDynamodbError(json.dumps({"httpStatus": 400, "message": "DynamoDB Update Error"}))
 
 class RecordConversionError(Exception): pass
 class ApiPostError(Exception): pass
+class UpdateDynamodbError(Excpetion): pass

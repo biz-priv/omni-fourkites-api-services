@@ -16,6 +16,7 @@ def modify_date(x):
             return x.isoformat()
     except Exception as e:
         logging.exception("DateConversionError: {}".format(e))
+        raise DateConversionError(json.dumps({"httpStatus": 501, "message": InternalErrorMessage}))
 
 def execute_db_query(query):
     try:
@@ -52,5 +53,8 @@ def validateDynamoDB(filenumber):
             return orderno
     except Exception as e:
         logging.exception("ValidateDynamodbError: {}".format(e))
+        raise ValidateDynamodbError(json.dumps({"httpStatus": 501, "message": "Validate Dynamo error."}))
         
 class DatabaseError(Exception): pass
+class ValidateDynamodbError(Exception): pass
+class DateConversionError(Exception): pass
